@@ -129,8 +129,14 @@ class WebCrawler(object):
   
                     orig_path = path
                     if self.strip_html_extension:
-                        path = path.replace(".html", "")    
-                        path = path.replace(".htm", "")    
+                        if not path.endswith("index.html"):
+                            # index.html is handled specially in the code
+                            # and it must be preserved so that other parts
+                            # of transmogrified work correctly.
+                            # The symptom of this is not getting the titles
+                            # right on the cover page.
+                            path = path.replace(".html", "")    
+                            path = path.replace(".htm", "")    
                     
                     
                     if info:
