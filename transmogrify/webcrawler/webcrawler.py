@@ -25,7 +25,7 @@ CHECKEXT = True    # Check external references (1 deep)
 VERBOSE = 0         # Verbosity level (0-3)
 MAXPAGE = 150000    # Ignore files bigger than this
 NONAMES = 0         # Force name anchor checking
-
+STRIP_HTML_EXTENSION = "true" # Should .html dropped from the end of the path
 
 class WebCrawler(object):
     classProvides(ISectionBlueprint)
@@ -47,6 +47,7 @@ class WebCrawler(object):
         self.maxpage   = options.get('maxpage', MAXPAGE)
         self.nonames   = options.get('nonames', NONAMES)
         self.site_url  = options.get('site_url', None)
+        self.strip_html_extension   = options.get('strip_html_extension', STRIP_HTML_EXTENSION) == "true"
         self.cache = options.get('cache', True)
         self.context = transmogrifier.context
         self.alias_bases  = [a for a in options.get('alias_bases', '').split() if a]
@@ -125,6 +126,13 @@ class WebCrawler(object):
                     info = self.checker.infos.get(url)
                     file = self.checker.files.get(url)
                     sortorder = self.checker.sortorder.get(origin,0)
+  
+                    orig_path = path
+                    if self.strip_html_extension:
+                        path = path.replace(".html", "")    
+                        path = path.replace(".htm", "")    
+                    
+                    
                     if info:
                         text = page and page.html() or file
                         item = dict(_path         = path,
@@ -133,7 +141,7 @@ class WebCrawler(object):
                                     _sortorder    = sortorder,
                                     _content      = text,
                                     _content_info = info,
-                                    _orig_path    = path)
+                                    _orig_path    = orig_path)
                         if origin != url:
                             orig_path = origin[len(self.site_url):]
                             orig_path = '/'.join([p for p in orig_path.split('/') if p])
